@@ -30,17 +30,16 @@ def main():
     
     if current_os == "Windows":
         print("Windows用のビルドを実行します...")
-        cmd.extend([
-            "--onefile",
-            "--windowed",
-            "--icon", "assets/icon.ico" if os.path.exists("assets/icon.ico") else None,
-        ])
+        icon_path = "assets/icon.ico" if os.path.exists("assets/icon.ico") else None
+        cmd.extend(["--onefile", "--windowed"])
+        if icon_path:
+            cmd.extend(["--icon", icon_path])
     elif current_os == "Darwin":  # macOS
         print("macOS用のビルドを実行します...")
-        cmd.extend([
-            "--windowed",
-            "--icon", "assets/icon.icns" if os.path.exists("assets/icon.icns") else None,
-        ])
+        icon_path = "assets/icon.icns" if os.path.exists("assets/icon.icns") else None
+        cmd.extend(["--windowed"])
+        if icon_path:
+            cmd.extend(["--icon", icon_path])
     else:
         print(f"警告: {current_os}はサポートされていません。Linuxとして続行します。")
         cmd.extend([
