@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "marutool"
+version = "0.1.0"
+description = "三期決算図生成アプリケーション - Financial statement visualization tool"
+authors = ["Devin AI <158243242+devin-ai-integration[bot]@users.noreply.github.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.12,<3.13"
+PyQt5 = "^5.15.9"
+pdfplumber = "^0.10.2"
+PyMuPDF = "^1.23.8"
+pytesseract = "^0.3.10"
+pdf2image = "^1.16.3"
+Pillow = "^10.2.0"
+pandas = "^2.2.0"
+matplotlib = "^3.8.2"
+PyInstaller = "^6.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
