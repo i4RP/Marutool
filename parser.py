@@ -226,15 +226,19 @@ class PDFParser:
         Returns:
             int: 抽出された数値（見つからない場合はNone）
         """
-        regex = re.compile(f".*{pattern}.*?([0-9,]+).*")
-        matches = regex.findall(text)
-        
-        if matches:
-            value_str = matches[0].replace(",", "")
-            try:
-                return int(value_str)
-            except ValueError:
-                logger.warning(f"数値変換に失敗: {value_str}")
-                return None
+        try:
+            regex = re.compile(f".*{pattern}.*?([0-9,]+).*")
+            matches = regex.findall(text)
+            
+            if matches and len(matches) > 0:
+                value_str = matches[0].replace(",", "")
+                try:
+                    return int(value_str)
+                except ValueError:
+                    logger.warning(f"数値変換に失敗: {value_str}")
+                    return None
+        except Exception as e:
+            logger.error(f"値の抽出中にエラーが発生しました: {e}")
+            return None
         
         return None
