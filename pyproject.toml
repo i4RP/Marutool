@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "三期決算図生成アプリケーション - Financial statement visualization tool"
 authors = ["Devin AI <158243242+devin-ai-integration[bot]@users.noreply.github.com>"]
 readme = "README.md"
+packages = [{include = "marutool"}]
 
 [tool.poetry.dependencies]
 python = ">=3.12,<3.13"
