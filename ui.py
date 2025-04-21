@@ -77,10 +77,10 @@ class MainWindow(QMainWindow):
         file_group = QGroupBox("PDFファイル選択")
         file_layout = QVBoxLayout()
         
+        self.file_labels = []
         for i in range(3):
             file_row = QHBoxLayout()
             label = QLabel(f"{i+1}期目:")
-            self.file_labels = []
             file_label = QLabel("ファイルが選択されていません")
             file_label.setStyleSheet("background-color: #f0f0f0; padding: 5px;")
             self.file_labels.append(file_label)
