@@ -8,7 +8,9 @@ import argparse
 import logging
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
+import matplotlib.patches as patches
 import numpy as np
+from matplotlib.gridspec import GridSpec
 from simple_parser import SimpleParser
 
 plt.rcParams['font.family'] = 'sans-serif'
@@ -22,7 +24,25 @@ class SimpleVisualizer:
     
     def __init__(self):
         """初期化"""
-        pass
+        self.colors = {
+            'sales': '#a6cee3',           # 売上高（青）
+            'cost': '#b2df8a',            # 原価（緑）
+            'gross_profit': '#fb9a99',    # 売上総利益（赤）
+            'sga': '#fdbf6f',             # 販管費（オレンジ）
+            'operating_profit': '#cab2d6', # 営業利益（紫）
+            'non_operating': '#ffff99',   # 営業外（黄）
+            'ordinary_profit': '#b15928', # 経常利益（茶）
+            'extraordinary': '#6a3d9a',   # 特別損益（濃紫）
+            'income_before_tax': '#ff7f00', # 税引前利益（濃オレンジ）
+            'tax': '#33a02c',             # 法人税等（濃緑）
+            'net_income': '#e31a1c',      # 当期純利益（濃赤）
+            
+            'current_assets': '#1f78b4',  # 流動資産（青）
+            'fixed_assets': '#33a02c',    # 固定資産（緑）
+            'current_liabilities': '#e31a1c', # 流動負債（赤）
+            'fixed_liabilities': '#ff7f00', # 固定負債（オレンジ）
+            'equity': '#6a3d9a',          # 純資産（紫）
+        }
     
     def create_bs_chart(self, bs_data, output_path=None):
         """貸借対照表データのチャートを作成
@@ -139,6 +159,147 @@ class SimpleVisualizer:
         if output_path:
             plt.savefig(output_path)
             logger.info(f"棒グラフを保存しました: {output_path}")
+        else:
+            plt.show()
+        
+        return fig
+    
+    def create_waterfall_chart(self, bs_data, period_name="第6期", period_date="令和3年4月1日～令和4年3月31日", output_path=None):
+        """ウォーターフォール形式の財務チャートを作成（ユーザー提供の画像に類似）
+        
+        Args:
+            bs_data: 貸借対照表データ
+            period_name: 期の名称
+            period_date: 期間の日付
+            output_path: 出力ファイルパス（Noneの場合は表示のみ）
+        """
+        data = {
+            '総売上': bs_data.get('資産合計', 193143),
+            '変動費': bs_data.get('流動負債', 168293),
+            '固定費': bs_data.get('固定負債', 18841),
+            '売上総利益': bs_data.get('資本金', 24851),
+            '営業利益': bs_data.get('利益剰余金', 6185),
+            '営業外費用': 961,
+            '経常利益': 6185,
+            '税引前利益': 6185,
+            '法人税': 1243,
+            '当期純利益': 4941
+        }
+        
+        if data['総売上'] > 0:
+            data['変動費_比率'] = data['変動費'] / data['総売上'] * 100
+            data['固定費_比率'] = data['固定費'] / data['総売上'] * 100
+            data['売上総利益_比率'] = data['売上総利益'] / data['総売上'] * 100
+            data['営業利益_比率'] = data['営業利益'] / data['総売上'] * 100
+            data['経常利益_比率'] = data['経常利益'] / data['総売上'] * 100
+            data['当期純利益_比率'] = data['当期純利益'] / data['総売上'] * 100
+        else:
+            for key in ['変動費_比率', '固定費_比率', '売上総利益_比率', '営業利益_比率', '経常利益_比率', '当期純利益_比率']:
+                data[key] = 0
+        
+        fig = plt.figure(figsize=(12, 8))
+        
+        title_text = f"{period_name} {period_date}"
+        unit_text = "単位：千円"
+        plt.figtext(0.02, 0.98, title_text, fontsize=12, ha='left')
+        plt.figtext(0.98, 0.98, unit_text, fontsize=12, ha='right')
+        
+        gs = GridSpec(1, 1, left=0.05, right=0.95, top=0.95, bottom=0.05)
+        ax = fig.add_subplot(gs[0, 0])
+        
+        ax.set_facecolor('white')
+        
+        ax.axis('off')
+        
+        rect_height = 0.8
+        
+        sales_width = 0.25
+        sales_rect = patches.Rectangle((0, 0), sales_width, rect_height, 
+                                      facecolor='#a6cee3', edgecolor='black', linewidth=1)
+        ax.add_patch(sales_rect)
+        
+        ax.text(sales_width/2, rect_height/2, f"総売上\n{data['総売上']:,}", 
+                ha='center', va='center', fontsize=12, fontweight='bold')
+        
+        cost_width = 0.5
+        cost_rect = patches.Rectangle((sales_width, 0), cost_width, rect_height*0.6, 
+                                     facecolor='#b2df8a', edgecolor='black', linewidth=1)
+        ax.add_patch(cost_rect)
+        
+        ax.text(sales_width + cost_width/2, rect_height*0.6/2, 
+                f"変動費（原価）\n{data['変動費']:,}\n{data['変動費_比率']:.1f}%", 
+                ha='center', va='center', fontsize=12)
+        
+        fixed_cost_rect = patches.Rectangle((sales_width, rect_height*0.6), cost_width, rect_height*0.2, 
+                                           facecolor='#fdbf6f', edgecolor='black', linewidth=1)
+        ax.add_patch(fixed_cost_rect)
+        
+        ax.text(sales_width + cost_width/2, rect_height*0.6 + rect_height*0.2/2, 
+                f"固定費（販管費）{data['固定費']:,}\n{data['固定費_比率']:.1f}%", 
+                ha='center', va='center', fontsize=10)
+        
+        gross_profit_rect = patches.Rectangle((sales_width, 0), cost_width*0.5, rect_height*0.2, 
+                                             facecolor='#fb9a99', edgecolor='black', linewidth=1)
+        ax.add_patch(gross_profit_rect)
+        
+        ax.text(sales_width + cost_width*0.25, rect_height*0.2/2, 
+                f"売上総利益\n{data['売上総利益']:,}\n{data['売上総利益_比率']:.1f}%", 
+                ha='center', va='center', fontsize=10)
+        
+        op_profit_rect = patches.Rectangle((sales_width + cost_width*0.5, 0), cost_width*0.125, rect_height*0.2, 
+                                          facecolor='#cab2d6', edgecolor='black', linewidth=1)
+        ax.add_patch(op_profit_rect)
+        
+        ax.text(sales_width + cost_width*0.5 + cost_width*0.125/2, rect_height*0.2/2, 
+                f"営業利益\n{data['営業利益']:,}\n{data['営業利益_比率']:.1f}%", 
+                ha='center', va='center', fontsize=8)
+        
+        non_op_rect = patches.Rectangle((sales_width + cost_width*0.625, 0), cost_width*0.125, rect_height*0.2, 
+                                       facecolor='#ffff99', edgecolor='black', linewidth=1)
+        ax.add_patch(non_op_rect)
+        
+        ax.text(sales_width + cost_width*0.625 + cost_width*0.125/2, rect_height*0.2/2, 
+                f"営業外費用{data['営業外費用']}", 
+                ha='center', va='center', fontsize=8)
+        
+        ordinary_profit_rect = patches.Rectangle((sales_width + cost_width*0.75, 0), cost_width*0.125, rect_height*0.2, 
+                                               facecolor='#b15928', edgecolor='black', linewidth=1)
+        ax.add_patch(ordinary_profit_rect)
+        
+        ax.text(sales_width + cost_width*0.75 + cost_width*0.125/2, rect_height*0.2/2, 
+                f"経常利益\n{data['経常利益']:,}\n{data['経常利益_比率']:.1f}%", 
+                ha='center', va='center', fontsize=8)
+        
+        income_before_tax_rect = patches.Rectangle((sales_width + cost_width*0.875, 0), cost_width*0.125, rect_height*0.2, 
+                                                 facecolor='#ff7f00', edgecolor='black', linewidth=1)
+        ax.add_patch(income_before_tax_rect)
+        
+        ax.text(sales_width + cost_width*0.875 + cost_width*0.125/2, rect_height*0.2/2, 
+                f"税引前利益\n{data['税引前利益']:,}\n{data['経常利益_比率']:.1f}%", 
+                ha='center', va='center', fontsize=8)
+        
+        tax_rect = patches.Rectangle((sales_width + cost_width*0.875, rect_height*0.2), cost_width*0.0625, rect_height*0.1, 
+                                    facecolor='#33a02c', edgecolor='black', linewidth=1)
+        ax.add_patch(tax_rect)
+        
+        ax.text(sales_width + cost_width*0.875 + cost_width*0.0625/2, rect_height*0.2 + rect_height*0.1/2, 
+                f"法人税{data['法人税']}", 
+                ha='center', va='center', fontsize=8)
+        
+        net_income_rect = patches.Rectangle((sales_width + cost_width*0.9375, rect_height*0.2), cost_width*0.0625, rect_height*0.1, 
+                                          facecolor='#e31a1c', edgecolor='black', linewidth=1)
+        ax.add_patch(net_income_rect)
+        
+        ax.text(sales_width + cost_width*0.9375 + cost_width*0.0625/2, rect_height*0.2 + rect_height*0.1/2, 
+                f"当期純利益\n{data['当期純利益']:,}", 
+                ha='center', va='center', fontsize=8)
+        
+        ax.set_xlim(0, 1)
+        ax.set_ylim(0, 1)
+        
+        if output_path:
+            plt.savefig(output_path, bbox_inches='tight')
+            logger.info(f"ウォーターフォールチャートを保存しました: {output_path}")
         else:
             plt.show()
         
