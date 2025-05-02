@@ -75,6 +75,11 @@ class MainWindow(QMainWindow):
         self.chart_type_group.addButton(bar_radio)
         chart_type_layout.addWidget(bar_radio)
         
+        waterfall_radio = QRadioButton("ウォーターフォール")
+        waterfall_radio.toggled.connect(lambda: self.set_chart_type("waterfall"))
+        self.chart_type_group.addButton(waterfall_radio)
+        chart_type_layout.addWidget(waterfall_radio)
+        
         chart_type_group.setLayout(chart_type_layout)
         main_layout.addWidget(chart_type_group)
         
@@ -191,8 +196,14 @@ class MainWindow(QMainWindow):
         
         if self.chart_type == "pie":
             visualizer.create_bs_chart(self.bs_data, self.chart_path)
-        else:
+        elif self.chart_type == "bar":
             visualizer.create_bs_bar_chart(self.bs_data, self.chart_path)
+        elif self.chart_type == "waterfall":
+            filename = os.path.basename(self.pdf_path)
+            period_name = f"第{filename.split('_')[1].split('期')[0]}期" if '_' in filename and '期' in filename else "第6期"
+            period_date = "令和3年4月1日～令和4年3月31日"  # デフォルト値
+            
+            visualizer.create_waterfall_chart(self.bs_data, period_name, period_date, self.chart_path)
         
         self.display_chart()
     
