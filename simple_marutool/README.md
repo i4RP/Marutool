@@ -49,8 +49,23 @@ poetry run python simple_cli.py --pdf "エピック_6期決算書.pdf"
 
 ### コマンドライン版（可視化含む）
 ```bash
+# 円グラフ
 poetry run python simple_visualizer.py --pdf "エピック_6期決算書.pdf" --output "bs_chart.png" --type "pie"
+
+# 棒グラフ
+poetry run python simple_visualizer.py --pdf "エピック_6期決算書.pdf" --output "bs_chart.png" --type "bar"
 ```
+
+### アプリケーションのビルド
+```bash
+# ビルドスクリプトを実行
+poetry run python build.py
+```
+
+ビルド後、以下のディレクトリに実行可能ファイルが生成されます：
+- Windows: `dist/SimpleMaru.exe`
+- macOS: `dist/SimpleMaru.app`
+- Linux: `dist/SimpleMaru`
 
 ## 抽出項目（10項目）
 1. 流動資産合計
