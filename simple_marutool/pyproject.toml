@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "simple-marutool"
+version = "0.1.0"
+description = "シンプル版三期決算図生成アプリケーション - 貸借対照表データ抽出"
+authors = ["Devin AI <158243242+devin-ai-integration[bot]@users.noreply.github.com>"]
+readme = "README.md"
+packages = [{include = "simple_marutool"}]
+
+[tool.poetry.dependencies]
+python = ">=3.12,<3.13"
+pdfplumber = "^0.10.2"
+PyMuPDF = "^1.23.8"
+pytesseract = "^0.3.10"
+pdf2image = "^1.16.3"
+Pillow = "^10.2.0"
+PyQt5 = "^5.15.9"
+matplotlib = "^3.10.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
